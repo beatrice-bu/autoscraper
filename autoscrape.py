@@ -11,6 +11,9 @@ import urllib.request
 import argh
 import json
 import os
+import pandas as pd
+import numpy as np
+
 
 @argh.arg('websites', help='Path to .json file with websites to scrape. Required.')
 @argh.arg('--path', '-p', help='Path to CHROME WEBDRIVER Selenium will use. Default is current folder.')
@@ -59,8 +62,9 @@ def autoscrape(websites, output='output', path='./chromedriver.exe', scrolls=1):
         os.makedirs(output)
     
     #list of URLS to each image, which will be retrieved by urllib
-    images_to_be_downloaded = []
-    
+    image_sources = []
+    image_texts = []
+    image_sites = []
     #instantiating our selenium webdriver, using our path to chromedriver.exe and our new user-agent mask
     driver = webdriver.Chrome(path, options=options)
     
@@ -97,26 +101,28 @@ def autoscrape(websites, output='output', path='./chromedriver.exe', scrolls=1):
                 #saving a list of the locations of images on the page
                 all_present_images = driver.find_elements_by_tag_name('img')
                 #iterating through every image within all_present_images
+                index = 0
+                
                 for image in all_present_images:
                     #acquiring the 'source' url of the image
                     image_source = image.get_attribute("src")
-                    #adding the image source to the image
-                    images_to_be_downloaded.append(image_source)
-                    print(images_to_be_downloaded)
+                    image_text = image.get_attribute("alt")
+                    
+                    
+                    image_sources.append(image_source)
+                    image_texts.append(image_text)
+                    image_sites.append(name)
+                    
                 #now that we have all the image sources saved, we can close the page
                 driver.close()
         finally:
-            #image naming starts at 00
-            img_num = 00
-            #for every image source in images_to_be_downloaded
-            for image in images_to_be_downloaded:
-                # example: '/' + 'github' + '00' + .jpg' = '/github00.jpg'
-                file_name = "/" + name + str(img_num) + ".jpg"
-                #creates a variable that is the complete path of output folder + image name
-                image_location = output + file_name
-                #downloads the image to the selected location, from the iterated `image` source
-                urllib.request.urlretrieve(image, image_location)
-                img_num += 1
+            data = {
+                    "source":image_sources,
+                    "text":image_texts,
+                    "site":image_sites
+                }
+            df = pd.DataFrame.from_dict(data, dtype='str')
+            df.to_csv('image_data.csv', index=False)
         driver.quit()
 
 

@@ -19,8 +19,9 @@ import numpy as np
 @argh.arg('--path', '-p', help='Path to CHROME WEBDRIVER Selenium will use. Default is current folder.')
 @argh.arg('--output', '-o', help='Path to OUTPUT folder where images will go. Default is current folder.')
 @argh.arg('--scrolls', '-s', help="Define number of times autoscraper scrolls on a page. Default is 1.")
-def autoscrape(websites, output='output', path='./chromedriver.exe', scrolls=1):
-
+@argh.arg('--mode', '-m', choices=['csv','download'], help='Mode for downloading images. "csv" to download image data as a csv, "download" to download locally.')
+def autoscrape(websites, output='output', path='./chromedriver.exe', scrolls=1, mode='csv'):
+    import_mode = mode
     '''
     <WEBSITES JSON> <PATH TO OUTPUT FOLDER> <PATH TO CHROME WEBDRIVER> <# OF SCROLLS PER PAGE>
     Please be sure to download the Chrome Webdriver for whatever version of chrome you use. Can be found here: https://chromedriver.chromium.org/downloads
@@ -116,13 +117,30 @@ def autoscrape(websites, output='output', path='./chromedriver.exe', scrolls=1):
                 #now that we have all the image sources saved, we can close the page
                 driver.close()
         finally:
+            
             data = {
-                    "source":image_sources,
-                    "text":image_texts,
-                    "site":image_sites
-                }
+                        "source":image_sources,
+                        "text":image_texts,
+                        "site":image_sites
+                    }
             df = pd.DataFrame.from_dict(data, dtype='str')
-            df.to_csv('image_data.csv', index=False)
+                
+            if import_mode == 'csv':
+
+                df.to_csv(output + '/' + 'image_data.csv', index=False)
+                
+            elif import_mode == 'download':
+                
+                img_num = 00
+                for source in df['source']:
+                    
+                    # example: '/' + 'github' + '00' + .jpg' = '/github00.jpg'
+                    file_name = "/" + name + str(img_num) + ".jpg"
+                    #creates a variable that is the complete path of output folder + image name
+                    image_location = output + file_name
+                    #downloads the image to the selected location, from the iterated `image` source
+                    urllib.request.urlretrieve(source, image_location)
+                    img_num += 1
         driver.quit()
 
 

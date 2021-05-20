@@ -10,6 +10,8 @@ It can download all images immediately, save image data in a .csv, or both.
 `python autoscrape.py ./websites.json --output ./output/ --path ./chromedriver.exe -s 1 -m csv`
 
 
+
+
 - `websites` Refers to the .JSON file used as a 'map' to direct your scraper. By default refers to a file called `websites.json`
 
 - `output` Defines the location that your chosen output will be created in. By default refers to a folder called `output`

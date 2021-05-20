@@ -22,3 +22,10 @@ It can download all images immediately, save image data in a .csv, or both.
 
 - `mode` Specifies if the output is the raw images, the image data(link and alt text) in .csv form, or both. Defaults to `csv`
 
+#### Using JSON Data
+
+JSON data is used to direct the Auto Scraper to specific websites. The key is for the specified URL, and the value is the corresponding label you'd like to give the downloaded images. This is used for their file name and also is stored within the 'csv' output option.
+
+`{"URL":"Website Name",
+"https://www.github.com":"github"
+}`
